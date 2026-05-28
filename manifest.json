@@ -1,0 +1,14 @@
+{
+  "name": "東洋医学チェッカー",
+  "short_name": "東洋チェッカー",
+  "description": "問診・体質チェック・症状辞典（10体質×30症状）",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f1e8",
+  "theme_color": "#2d5a4a",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

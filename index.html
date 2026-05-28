@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#2d5a4a" />
+<title>東洋医学チェッカー</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header>
+  <h1>東洋医学チェッカー</h1>
+  <nav class="tabs">
+    <button class="tab active" data-tab="intake">問診</button>
+    <button class="tab" data-tab="check">体質チェック</button>
+    <button class="tab" data-tab="dict">症状辞典</button>
+    <button class="tab" data-tab="ref">体質一覧</button>
+    <button class="tab" data-tab="care">セルフケア</button>
+  </nav>
+</header>
+
+<main>
+  <!-- 問診 -->
+  <section id="tab-intake" class="tab-panel active">
+    <div class="toolbar">
+      <button id="resetIntake" class="btn-sub">クリア</button>
+      <span class="hint">タップで記入 → 末尾に見立てヒントが出ます</span>
+    </div>
+    <div id="intakeList"></div>
+    <div id="intakeResult" class="result-card" hidden></div>
+  </section>
+
+  <!-- 体質チェック -->
+  <section id="tab-check" class="tab-panel">
+    <div class="toolbar">
+      <button id="resetCheck" class="btn-sub">クリア</button>
+      <span class="hint">気になる項目をタップ → 下に判定が出ます</span>
+    </div>
+    <div id="checkList"></div>
+    <div id="checkResult" class="result-card" hidden></div>
+  </section>
+
+  <!-- 症状辞典（逆引き含む） -->
+  <section id="tab-dict" class="tab-panel">
+    <div class="toolbar">
+      <input id="dictSearch" type="search" placeholder="症状で検索（例：頭痛・むくみ・不眠）" />
+    </div>
+    <div id="dictReverse"></div>
+    <div id="dictList"></div>
+  </section>
+
+  <!-- セルフケア -->
+  <section id="tab-care" class="tab-panel">
+    <div class="toolbar">
+      <input id="careSearch" type="search" placeholder="タイプ・症状で検索（例：不眠・冷え）" />
+    </div>
+    <div class="seg" id="careSeg">
+      <button class="seg-btn active" data-seg="taishitsu">体質別（10）</button>
+      <button class="seg-btn" data-seg="type">タイプ別（10）</button>
+      <button class="seg-btn" data-seg="scene">シーン別</button>
+      <button class="seg-btn" data-seg="howto">渡し方</button>
+    </div>
+    <div id="careList"></div>
+  </section>
+
+  <!-- 体質一覧 -->
+  <section id="tab-ref" class="tab-panel">
+    <div class="toolbar">
+      <input id="refSearch" type="search" placeholder="体質名で検索（例：気虚）" />
+    </div>
+    <div id="refList"></div>
+  </section>
+</main>
+
+<footer>院長・冨高／東洋医学チェッカー</footer>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
