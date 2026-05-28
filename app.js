@@ -270,8 +270,11 @@ function renderIntakeResult() {
       return {id, name:t.name, kana:t.kana, summary:t.summary, score:s, tsubo:t.tsubo, care:c};
     });
 
+  // ---- 個別おすすめセルフケア（特定回答に基づく）----
+  const extras = EXTRA_CARE.filter(r => { try { return r.trigger(intakeState); } catch { return false; } });
+
   const box = document.getElementById('intakeResult');
-  if (!hints.length && !ranked.length) { box.hidden = true; return; }
+  if (!hints.length && !ranked.length && !extras.length) { box.hidden = true; return; }
   box.hidden = false;
   box.innerHTML = `
     ${hints.length ? `
@@ -306,6 +309,15 @@ function renderIntakeResult() {
       </ul>
       <p class="note">※ 複合体質が一般的。上位2〜3つを組み合わせて見ます</p>
     ` : ''}
+    ${extras.length ? `
+      <h3 style="margin-top:14px;">この人への追加セルフケア（生活習慣ベース）</h3>
+      <ul class="rank">
+        ${extras.map(e => `
+          <li>
+            <p><b>★ ${escapeHtml(e.title)}</b></p>
+            <p class="note">${escapeHtml(e.why)}</p>
+          </li>`).join('')}
+      </ul>` : ''}
   `;
 }
 
