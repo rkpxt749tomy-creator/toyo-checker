@@ -209,6 +209,46 @@ footer {
   font-size: 12px; padding: 24px 16px 40px;
 }
 
+/* ---- 4タイプ診断 ---- */
+.diag-hero { text-align:center; padding:18px 12px 8px; }
+.diag-hero h2 { font-size:22px; margin:0 0 6px; color:var(--accent); line-height:1.4; }
+.diag-hero .diag-sub { color:var(--ink-sub); font-size:14px; margin:0 0 14px; line-height:1.5; }
+.diag-hero p { text-align:left; font-size:14px; }
+.btn-primary {
+  display:inline-block; padding:14px 28px; margin-top:16px;
+  background:var(--warm); color:#fff; border:none; border-radius:28px;
+  font-size:16px; font-weight:700; cursor:pointer;
+  box-shadow:0 4px 0 #a4502f;
+}
+.btn-primary:active { transform:translateY(2px); box-shadow:0 2px 0 #a4502f; }
+.voice {
+  background:#fff; border:1px solid var(--border); border-radius:8px;
+  padding:10px 14px; margin-bottom:8px; font-size:13px;
+}
+.voice-head { display:flex; gap:6px; align-items:center; margin-bottom:4px; }
+.progress {
+  background:var(--border); height:6px; border-radius:3px;
+  overflow:hidden; margin-bottom:6px;
+}
+.progress-bar { background:var(--accent); height:100%; transition:width .3s; }
+.q-text { font-size:16px; margin:8px 0 14px; line-height:1.6; }
+.diag-choices { display:flex; flex-direction:column; gap:8px; }
+.choice-btn {
+  padding:14px 16px; background:#fff;
+  border:2px solid var(--accent-soft); color:var(--ink);
+  border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;
+  text-align:left;
+}
+.choice-btn:hover, .choice-btn:active { background:var(--accent); color:#fff; }
+.diag-scores { margin-top:12px; }
+.diag-bar { display:flex; align-items:center; gap:8px; margin-bottom:5px; font-size:12px; }
+.diag-bar-label { width:90px; flex:none; }
+.diag-bar-track { flex:1; background:var(--border); height:14px; border-radius:7px; overflow:hidden; }
+.diag-bar-fill { background:var(--accent-soft); height:100%; }
+.diag-bar.top .diag-bar-fill { background:var(--warm); }
+.diag-bar-score { width:42px; flex:none; text-align:right; color:var(--ink-sub); }
+.letter p { margin:6px 16px; font-size:14px; line-height:1.7; }
+
 .seg {
   display: flex; gap: 4px; margin-bottom: 10px;
   background: #fff; padding: 4px;
