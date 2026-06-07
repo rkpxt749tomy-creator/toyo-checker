@@ -1,13 +1,49 @@
 // ---------- Tabs ----------
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
 document.querySelectorAll('.tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  });
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
+
+// 候補体質 → セルフケアタブへジャンプ（体質名で絞り込み）
+function goToCare(name) {
+  switchTab('care');
+  document.querySelectorAll('#careSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.seg === 'taishitsu'));
+  careSeg = 'taishitsu';
+  careFilter = name;
+  const box = document.getElementById('careSearch');
+  if (box) box.value = name;
+  renderCare();
+}
+
+// ---------- 結果の出力（印刷/PDF・共有） ----------
+function printResult() { window.print(); }
+
+async function shareResult(boxId, title) {
+  const box = document.getElementById(boxId);
+  if (!box) return;
+  const text = `【${title}】\n` + box.innerText.trim() + '\n\n— 東洋医学チェッカー';
+  try {
+    if (navigator.share) { await navigator.share({ title, text }); return; }
+  } catch { /* キャンセル等は無視 */ }
+  try {
+    await navigator.clipboard.writeText(text);
+    alert('結果をコピーしました。LINE等に貼り付けて渡せます。');
+  } catch {
+    alert('共有に対応していません。印刷ボタンをお使いください。');
+  }
+}
+
+function outputBar(boxId, title) {
+  return `<div class="output-bar no-print">
+    <button class="btn-out" onclick="printResult()">🖨 印刷 / PDF保存</button>
+    <button class="btn-out" onclick="shareResult('${boxId}','${title}')">📤 共有・コピー</button>
+  </div>`;
+}
 
 // ---------- localStorage helpers ----------
 const LS = {
@@ -58,7 +94,7 @@ function renderCheck() {
 function renderCheckResult() {
   const ranked = TAISHITSU.map(t => ({
     name: t.name, id: t.id, count: (checkState[t.id] || []).length, total: t.checks.length,
-    summary: t.summary, care: t.care, tsubo: t.tsubo,
+    summary: t.summary, care: t.care, tsubo: t.tsubo, tongue: t.tongue,
   })).filter(r => r.count >= 1).sort((a,b) => b.count - a.count);
 
   const box = document.getElementById('checkResult');
@@ -72,11 +108,14 @@ function renderCheckResult() {
           <div class="rank-head"><span class="medal">${i+1}</span><b>${r.name}</b>
             <span class="badge ${r.count>=5?'hot':''}">${r.count}/${r.total}</span></div>
           <p class="lead">${r.summary}</p>
+          <p class="tongue"><b>舌診の目安:</b> ${escapeHtml(r.tongue)}</p>
           <div><b>ツボ:</b>${tsuboHtml(r.tsubo)}</div>
           <p><b>セルフケア:</b> ${r.care.slice(0,3).join(' / ')}</p>
+          <button class="btn-link no-print" onclick="goToCare('${r.name}')">→ ${r.name}のセルフケアを見る</button>
         </li>`).join('')}
     </ul>
     ${ranked.length > 1 ? `<p class="note">※ 複合体質が一般的です。上位2〜3つを組み合わせて見ます。</p>` : ''}
+    ${outputBar('checkResult', '体質チェック結果')}
   `;
 }
 
@@ -246,19 +285,26 @@ function renderIntakeResult() {
 
   // ---- 体質スコア計算 ----
   const scores = {};
-  TAISHITSU.forEach(t => scores[t.id] = 0);
+  const reasons = {}; // id -> [{ans, pts}] 判定根拠
+  TAISHITSU.forEach(t => { scores[t.id] = 0; reasons[t.id] = []; });
   INTAKE.forEach(sec => sec.q.forEach(q => {
     const v = intakeState[q.key]; if (!v) return;
     const vals = Array.isArray(v) ? v : [v];
     vals.forEach(x => {
       const m = SCORE_MAP[`${q.key}:${x}`];
-      if (m) for (const id in m) scores[id] = (scores[id]||0) + m[id];
+      if (m) for (const id in m) {
+        scores[id] = (scores[id]||0) + m[id];
+        reasons[id].push({ ans: x, pts: m[id] });
+      }
     });
   }));
   SCORE_SCALE.forEach(rule => {
     const v = intakeState[rule.key];
-    if (rule.th != null && v >= rule.th) for (const id in rule.score) scores[id] += rule.score[id];
-    if (rule.max != null && v && v <= rule.max) for (const id in rule.score) scores[id] += rule.score[id];
+    const hit = (rule.th != null && v >= rule.th) || (rule.max != null && v && v <= rule.max);
+    if (hit) for (const id in rule.score) {
+      scores[id] += rule.score[id];
+      reasons[id].push({ ans: `${rule.key.replace(/^[A-Z]\d_/, '')}=${v}`, pts: rule.score[id] });
+    }
   });
   const ranked = Object.entries(scores)
     .filter(([,s]) => s >= 2)
@@ -267,7 +313,7 @@ function renderIntakeResult() {
     .map(([id, s]) => {
       const t = TAISHITSU.find(x => x.id === id);
       const c = CARE_TAISHITSU.find(x => x.name === t.name);
-      return {id, name:t.name, kana:t.kana, summary:t.summary, score:s, tsubo:t.tsubo, care:c};
+      return {id, name:t.name, kana:t.kana, summary:t.summary, score:s, tsubo:t.tsubo, care:c, tongue:t.tongue, reasons:reasons[id]};
     });
 
   // ---- 個別おすすめセルフケア（特定回答に基づく）----
@@ -291,7 +337,13 @@ function renderIntakeResult() {
               <span class="kana">（${r.kana}）</span>
               <span class="badge ${r.score>=4?'hot':''}">${r.score}点</span></div>
             <p class="lead">${r.summary}</p>
+            <p class="tongue"><b>舌診の目安:</b> ${escapeHtml(r.tongue)}</p>
             <div><b>ツボ:</b>${tsuboHtml(r.tsubo)}</div>
+            ${r.reasons && r.reasons.length ? `
+            <details class="reason"><summary class="hint">この判定の根拠（${r.reasons.length}件）</summary>
+              <ul class="reason-list">${r.reasons.map(x=>`<li>${escapeHtml(x.ans)} <span class="pts">+${x.pts}</span></li>`).join('')}</ul>
+            </details>` : ''}
+            <button class="btn-link no-print" onclick="goToCare('${r.name}')">→ ${r.name}のセルフケアを見る</button>
           </li>`).join('')}
       </ul>
       <h3 style="margin-top:14px;">この人へのセルフケア（一番効く1個）</h3>
@@ -318,6 +370,7 @@ function renderIntakeResult() {
             <p class="note">${escapeHtml(e.why)}</p>
           </li>`).join('')}
       </ul>` : ''}
+    ${outputBar('intakeResult', '問診結果')}
   `;
 }
 

@@ -294,3 +294,66 @@ table.rev th {
   .sym-grid, .ref-grid { grid-template-columns: 1fr; }
   .tab { padding: 10px 12px; font-size: 13px; }
 }
+
+/* ---- 舌診の目安 ---- */
+.tongue {
+  margin: 6px 0;
+  padding: 6px 10px;
+  background: #fbf3ef;
+  border-left: 3px solid var(--warm);
+  border-radius: 0 4px 4px 0;
+  font-size: 13px;
+}
+
+/* ---- 判定根拠 ---- */
+.reason { margin: 6px 0; }
+.reason-list {
+  list-style: none; margin: 6px 0 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.reason-list li {
+  font-size: 12px; padding: 3px 8px;
+  background: #f0ede3; border-radius: 12px;
+}
+.reason-list .pts { color: var(--accent); font-weight: 600; }
+
+/* ---- セルフケアへのジャンプ ---- */
+.btn-link {
+  margin-top: 8px;
+  background: none;
+  border: 1px solid var(--accent-soft);
+  color: var(--accent);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.btn-link:active { background: var(--accent); color: #fff; }
+
+/* ---- 結果の出力バー ---- */
+.output-bar {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-top: 16px; padding-top: 12px;
+  border-top: 1px dashed var(--border);
+}
+.btn-out {
+  flex: 1 1 auto;
+  background: var(--accent); color: #fff;
+  border: none; padding: 10px 14px;
+  border-radius: 8px; font-size: 14px; font-weight: 600;
+  cursor: pointer;
+}
+.btn-out:active { background: var(--accent-soft); }
+
+/* ---- 印刷 / PDF保存 ---- */
+@media print {
+  header, footer, .toolbar, .seg, .no-print,
+  #intakeList, #checkList, #dictReverse, #dictList, #refList, #careList { display: none !important; }
+  body { padding: 0; background: #fff; font-size: 12px; }
+  .tab-panel { display: none !important; }
+  .tab-panel.active { display: block !important; }
+  .result-card { box-shadow: none; border: none; padding: 0; }
+  .result-card[hidden] { display: none !important; }
+  details, .reason { open: true; }
+  details > summary { list-style: none; }
+}
